@@ -1,0 +1,26 @@
+---
+- name: compose pull & build
+  shell: |-
+    set -e
+    cd "{{cops_sentry_ct}}"
+    {{cops_sentry_dc}} build --pull
+  tags: sentry_build
+- include_role: {name: corpusops.roles/docker_compose_service}
+  vars:
+    _docker_compose_service:
+      project: "{{cops_sentry_composename}}"
+      working_directory: "{{cops_sentry_ct}}"
+      files: ["docker-compose.yml", "docker-compose.cops.yml"]
+      state: started
+- name: compose up
+  register: _c_upd
+  retries: 10
+  delay: 5
+  until: >-
+   _c_upd.rc == 0 or (
+   'already in use by container' not in _c_upd.stderr)
+  shell: |-
+    set -e
+    cd "{{cops_sentry_ct}}"
+    {{cops_sentry_dc}} up -d
+  tags: sentry_update

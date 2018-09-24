@@ -1,0 +1,29 @@
+---
+- package: {name: [virtualenv]}
+- file: {state: directory, mode: "0751", path: "{{item}}"}
+  with_items:
+  - "{{cops_sentry_dir}}"
+- shell: |-
+    d="{{cops_sentry_d}}"
+    gargs=$(if [ "x$(git config user.email)" = "x" ];then echo "-c user.name=Corpusops -c user.email=autocommiter@corpousops";fi; )
+    if [ -e "$d/.git" ];then
+      cd "$d" && if ! ( git diff --quiet );then git $gargs stash && echo stashed >&2;fi
+    fi
+  register: _c_stashed
+  changed_when: "'stashed' in _c_stashed.stderr"
+- name: Checkout
+  git:
+    accept_hostkey: yes
+    repo: "{{cops_sentry_url}}"
+    dest: "{{cops_sentry_d}}"
+    version: "{{cops_sentry_version}}"
+    recursive: true
+    update: true
+    force: true
+- file: {state: directory, mode: "0751", path: "{{item}}"}
+  with_items:
+  - "{{cops_sentry_d}}"
+  - "{{cops_sentry_data}}"
+  - "{{cops_sentry_data_postgresql}}"
+  - "{{cops_sentry_data_mail}}"
+  - "{{cops_sentry_data_backup}}"

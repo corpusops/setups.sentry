@@ -1,0 +1,75 @@
+---
+cops_sentry_version: master
+cops_sentry_name: sentry
+cops_sentry_network: 172.18.5
+cops_sentry_front_ip: 127.0.0.1
+cops_sentry_net_name: cops_sentry_net
+cops_sentry_int_ip: "{{cops_sentry_network}}.2"
+cops_sentry_proxy_name: "{{cops_sentry_name}}"
+cops_sentry_composename: "{{cops_sentry_name}}"
+cops_sentry_http_port: 80
+cops_sentry_https_port: 443
+cops_sentry_port: 8010
+cops_sentry_db_name: "{{cops_sentry_name}}_production"
+cops_sentry_db_user: "{{cops_sentry_name}}"
+cops_sentry_domain: "{{ansible_fqdn}}"
+cops_sentry_domains: ["{{cops_sentry_domain}}"]
+# cops_sentry_version: "5f4caa2"
+cops_sentry_admin_mail: null
+cops_sentry_db_password: "secret70a0VpwK66n54KB"
+cops_sentry_pg_password: "{{cops_sentry_db_password}}"
+cops_sentry_redis_password: "{{cops_sentry_db_password}}"
+cops_sentry_admin_password: secret05GB25q55r4I26G
+cops_sentry_email_relay_domain: "{{cops_sentry_domain.split('.')[1:]|join('.')}}"
+cops_sentry_email_local_relay_user: "relay@{{cops_sentry_email_relay_domain}}"
+cops_sentry_email_local_relay_password: "secretJBieJLR7XmY6udj"
+cops_sentry_email_identity: ""
+cops_sentry_email_server: "smtp.mydomain.com"
+cops_sentry_email_server_port: "25"
+cops_sentry_email_username: "sample_admin@mydomain.com"
+cops_sentry_email_error_email: ["sysadmin+registryerror@foo.com"]
+cops_sentry_email_password: "abc"
+cops_sentry_email_from: "admin <sample_admin@mydomain.com>"
+cops_sentry_email_ssl: "false"
+# tr -cd '[:alnum:]' < /dev/urandom | fold -w64 | head -n1
+cops_sentry_secret_key: null
+cops_sentry_extra_conf:
+- "A=1"
+# cops_sentry_url: "https://github.com/SUSE/Portus.git"
+cops_sentry_url: "https://github.com/corpusops/sentry-onpremise.git"
+cops_sentry_dir: "/srv/docker/sentry"
+cops_sentry_d: "{{cops_sentry_dir}}/releases/{{cops_sentry_version}}"
+cops_sentry_t: "{{cops_sentry_d}}"
+cops_sentry_c: "{{cops_sentry_dir}}/current"
+cops_sentry_ct: "{{cops_sentry_c}}"
+cops_sentry_configs_templates:
+- {name: "docker-compose.cops.yml"}
+- {name: "local/backup/setup/reconfigure.yml"}
+cops_sentry_configs_prefix: "{{cops_sentry_t}}/"
+cops_sentry_sshargs: >-
+  {% set k = hostvars[inventory_hostname].get(
+                'ansible_ssh_private_key_file', '') %}
+  {% if k%}-o IdentityFile={{k}} -o IdentitiesOnly=yes{%endif%}
+  {% if (
+      hostvars[inventory_hostname].ansible_connection|default('ssh')
+     ) not in [ 'smart', 'local'] %}
+  {{ hostvars[inventory_hostname].ssh_args | default('') }}
+  {{ hostvars[inventory_hostname].ansible_ssh_args | default('') }}
+  {{ hostvars[inventory_hostname].ansible_ssh_common_args | default('') }}
+  {{ hostvars[inventory_hostname].ansible_ssh_extra_args | default('') }}
+  {% endif %}
+cops_sentry_data: "{{cops_sentry_dir}}/local/data"
+cops_sentry_data_files: "{{cops_sentry_data}}/files"
+cops_sentry_data_postgresql: "{{cops_sentry_data}}/postgresql"
+cops_sentry_data_mail: "{{cops_sentry_data}}/mail"
+cops_sentry_data_backup: "{{cops_sentry_data}}/backup"
+cops_sentry_dc: "{{('docker-compose'
+                    ' -f docker-compose.yml'
+                    ' -f docker-compose.cops.yml -p sentry')}}"
+cops_sentry_extra_conf: |-
+  SENTRY_GITLAB_API_VERSION = 4
+  SENTRY_GITLAB_AUTH_SCOPE = "api"
+  SENTRY_GITLAB_BASE_DOMAIN = "gitlab.foo.net"
+  SENTRY_GITLAB_HTTP_SCHEME = "https"
+  SENTRY_GITLAB_APP_ID = "xxx"
+  SENTRY_GITLAB_APP_SECRET = "yyy"

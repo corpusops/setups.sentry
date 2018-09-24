@@ -1,0 +1,51 @@
+---
+- name: wait for mail relay init
+  register: _c_user
+  retries: 20
+  delay: 1
+  until: _c_user.rc == 0
+  shell: |-
+    set -ex
+    cd "{{cops_sentry_ct}}"
+    echo "{{cops_sentry_email_local_relay_password}}" \
+    | {{cops_sentry_dc}} \
+    exec -T smtp \
+    sh -c \
+    '/opt/postfix/saslpasswd.sh \
+      -u "{{cops_sentry_email_relay_domain}}" \
+      -c "{{cops_sentry_email_local_relay_user.split('@')[0]}}"'
+  no_log: "{{not (cops_secret_vars_debug|default(false))}}"
+  tags: sentry_mail_user
+  changed_when: false
+- name: run sentry upgrade
+  register: _c_upgrade
+  retries: 20
+  delay: 1
+  until: _c_upgrade.rc == 0
+  shell: |-
+    set -ex
+    cd "{{cops_sentry_ct}}"
+    {{cops_sentry_dc}} \
+    run  --rm -T web /entrypoint.sh upgrade --noinput
+  no_log: "{{not (cops_secret_vars_debug|default(false))}}"
+  tags: sentry_upgrade
+- name: create admin
+  register: _c_admin
+  retries: 20
+  delay: 1
+  until: >-
+    _c_admin.rc == 0 or
+    ((_c_admin.rc != 0) and ('already exists' in _c_admin.stderr))
+  failed_when:
+  - "(_c_admin.rc != 0) and ('already exists' not in _c_admin.stderr)"
+  shell: |-
+    set -ex
+    cd "{{cops_sentry_ct}}"
+    echo "{{cops_sentry_email_local_relay_password}}" \
+    | {{cops_sentry_dc}} \
+    run --rm -T web /entrypoint.sh createuser --superuser --no-input \
+      --email "{{cops_sentry_admin_mail}}" \
+      --password "{{cops_sentry_admin_password}}"
+  no_log: "{{not (cops_secret_vars_debug|default(false))}}"
+  tags: sentry_admin
+  changed_when: false

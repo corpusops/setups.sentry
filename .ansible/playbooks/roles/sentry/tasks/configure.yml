@@ -1,0 +1,20 @@
+---
+- file:
+    state: link
+    src: "{{cops_sentry_d}}"
+    path: "{{cops_sentry_c}}"
+- include_role: {name: corpusops.roles/configs}
+  vars:
+    cops_configs_templates: "{{cops_sentry_configs_templates}}"
+    cops_configs_prefix: "{{cops_sentry_configs_prefix}}"
+- blockinfile:
+    content: "{{cops_sentry_extra_conf}}"
+    marker: "# {mark} ANSIBLE extra conf"
+    path: "{{cops_sentry_configs_prefix}}/sentry.conf.py"
+  when: "cops_sentry_extra_conf|copsf_asbool"
+- name: compose build
+  shell: |-
+    set -e
+    cd "{{cops_sentry_ct}}"
+    {{cops_sentry_dc}} build --pull
+  tags: sentry_build

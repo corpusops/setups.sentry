@@ -1,0 +1,4 @@
+---
+cops_sentry_defaultvar: test2
+sentry_servers: sentry_servers
+# vim:set ft=sls:

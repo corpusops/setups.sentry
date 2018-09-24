@@ -1,0 +1,11 @@
+---
+- template:
+    trim_blocks: false
+    src: pillar.sls
+    dest: "/srv/makina-states/pillar/private.pillar.d/{{cops_sentry_proxy_name}}.sls"
+    mode: "0600"
+  tags: [haproxy]
+- shell: |
+    salt-call -lall --retcode-passthrough \
+      state.sls makina-states.services.proxy.haproxy
+  tags: [haproxy, haproxy_do]

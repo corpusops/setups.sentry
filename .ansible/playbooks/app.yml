@@ -1,0 +1,9 @@
+---
+- hosts: "{{sentry_servers|default('all')}}"
+  roles: [corpusops.roles/ansible_plugins]
+  tasks:
+  - tags: ["cops_sentry_do_app"]
+    when: ["cops_sentry_do_app|default(true)"]
+    block:
+    - include_role: {name: sentry_vars, public: true}
+    - include_role: {name: sentry}
