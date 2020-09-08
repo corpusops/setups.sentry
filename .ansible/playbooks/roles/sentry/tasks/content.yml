@@ -25,10 +25,13 @@
   shell: |-
     set -ex
     cd "{{cops_sentry_ct}}"
-    {{cops_sentry_dc}} \
-    run  --rm -T web /entrypoint.sh upgrade --noinput
+    ./install.sh
   no_log: "{{not (cops_secret_vars_debug|default(false))}}"
   tags: sentry_upgrade
+- block:
+  - include_tasks: services.yml
+  tags: ["cops_sentry_services_post"]
+  when: ["cops_sentry_services_post|default(true)"]
 - name: create admin
   register: _c_admin
   retries: 20
@@ -41,9 +44,8 @@
   shell: |-
     set -ex
     cd "{{cops_sentry_ct}}"
-    echo "{{cops_sentry_email_local_relay_password}}" \
-    | {{cops_sentry_dc}} \
-    run --rm -T web /entrypoint.sh createuser --superuser --no-input \
+    {{cops_sentry_dc}} \
+    run --no-deps --rm -T web /docker-entrypoint.sh createuser --superuser --no-input \
       --email "{{cops_sentry_admin_mail}}" \
       --password "{{cops_sentry_admin_password}}"
   no_log: "{{not (cops_secret_vars_debug|default(false))}}"

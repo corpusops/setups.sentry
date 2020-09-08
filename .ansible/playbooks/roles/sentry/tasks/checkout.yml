@@ -1,5 +1,6 @@
 ---
 - package: {name: [virtualenv]}
+  tags: [pkg_venv]
 - file: {state: directory, mode: "0751", path: "{{item}}"}
   with_items:
   - "{{cops_sentry_dir}}"
@@ -23,7 +24,3 @@
 - file: {state: directory, mode: "0751", path: "{{item}}"}
   with_items:
   - "{{cops_sentry_d}}"
-  - "{{cops_sentry_data}}"
-  - "{{cops_sentry_data_postgresql}}"
-  - "{{cops_sentry_data_mail}}"
-  - "{{cops_sentry_data_backup}}"

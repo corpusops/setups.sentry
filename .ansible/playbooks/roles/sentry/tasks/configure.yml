@@ -7,14 +7,28 @@
   vars:
     cops_configs_templates: "{{cops_sentry_configs_templates}}"
     cops_configs_prefix: "{{cops_sentry_configs_prefix}}"
+- shell: |-
+    set -ex
+    cd "{{cops_sentry_d}}"
+    sed -i -re "/^COMPOSE_PROJECT_NAME=/d" .env
 - blockinfile:
-    content: "{{cops_sentry_extra_conf}}"
+    content: "{{cops_sentry_docker_env}}"
     marker: "# {mark} ANSIBLE extra conf"
-    path: "{{cops_sentry_configs_prefix}}/sentry.conf.py"
-  when: "cops_sentry_extra_conf|copsf_asbool"
-- name: compose build
+    path: "{{cops_sentry_d}}/.env"
+- name: compose pull
   shell: |-
     set -e
-    cd "{{cops_sentry_ct}}"
-    {{cops_sentry_dc}} build --pull
-  tags: sentry_build
+    cd "{{cops_sentry_d}}"
+    {{cops_sentry_dc}} pull
+  tags: [sentry_pull]
+- name: compose build
+  shell: |-
+    set +e
+    cd "{{cops_sentry_d}}"
+    {{cops_sentry_dc}} build
+    echo "dcret:$?"
+  register: composebuild
+  retries: 2
+  delay: 0
+  until: "'dcret:0' in composebuild.stdout"
+  tags: [sentry_build]

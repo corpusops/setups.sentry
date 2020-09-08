@@ -1,21 +1,17 @@
 ---
-- include_tasks: checkout.yml
+- block:
+  - include_tasks: checkout.yml
   tags: ["cops_sentry_checkout"]
   when: ["cops_sentry_checkout|default(true)"]
-- include_tasks: configure.yml
+- block:
+  - include_tasks: configure.yml
   tags: ["cops_sentry_configure"]
-  when: ["cops_sentry_configure|defaul(true)"]
-- include_tasks: services.yml
+  when: ["cops_sentry_configure|default(true)"]
+- block:
+  - include_tasks: services.yml
   tags: ["cops_sentry_services"]
   when: ["cops_sentry_services|default(true)"]
-- include_tasks: content.yml
+- block:
+  - include_tasks: content.yml
   tags: ["cops_sentry_content"]
   when: ["cops_sentry_content|default(true)"]
-#  delegate_to: "localhost"
-#  synchronize:
-#    compress: false
-#    ssh_args: "{{cops_sentry_sshargs}}"
-#    src: "../../../../../"
-#    dest: "{{cops_sentry_dir}}/"
-#    rsync_opts: ["-azv", "--exclude", ".ansible", "--exclude", "local"]
-#    #update_opts: '--recursive'

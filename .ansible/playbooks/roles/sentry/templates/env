@@ -1,6 +1,3 @@
-SENTRY_DATADIR="{{cops_sentry_data}}"
-PG_DATADIR="{{cops_sentry_postgresql_data}}"
-REDIS_PASSWORD="{{cops_sentry_redis_password}}"
 POSTGRESQL_PASSWORD="{{cops_sentry_db_password}}"
 POSTGRESQL_DB="{{cops_sentry_db_name}}"
 SENTRY_SECRET_KEY="{{cops_sentry_secret_key}}"

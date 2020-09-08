@@ -10,16 +10,10 @@ x-env-defaults: &img_defaults
     PGDATA: /var/lib/postgresql/data/pgdata
   sentry: &env_sentry
     <<: [ *env_postgres, *env_redis]
-    SENTRY_DATADIR: "{{cops_sentry_data}}"
-    SENTRY_SECRET_KEY: "{{cops_sentry_secret_key}}"
     SENTRY_BROKER_URL: "redis://:{{cops_sentry_redis_password}}@redis:6379/0"
     SENTRY_MEMCACHED_HOST: "memcached"
-    SENTRY_SERVER_EMAIL: "{{cops_sentry_email_from}}"
-    SENTRY_EMAIL_HOST: "smtp"
-    SENTRY_EMAIL_PORT: "25"
-    SENTRY_EMAIL_USER: "{{cops_sentry_email_local_relay_user}}"
-    SENTRY_EMAIL_PASSWORD: "{{cops_sentry_email_local_relay_password}}"
     SENTRY_SINGLE_ORGANIZATION: "False"
+    SENTRY_USE_SSL: "{{cops_sentry_use_ssl}}"
   smtp: &env_smtp
     RELAY_POSTMASTER: "postmaster@{{cops_sentry_email_relay_domain}}"
     RELAY_MYHOSTNAME: "{{cops_sentry_email_relay_domain}}"
@@ -35,36 +29,48 @@ x-env-defaults: &img_defaults
 x-defaults: &defaults
   environment: { <<:  *env_sentry }
   volumes:
-  - "{{cops_sentry_data_files}}:/var/lib/sentry/files"
+  - 'sentry-data:/var/lib/sentry/files'
+  - 'sentry-data:/data'
+  - './sentry/config.yml:/usr/src/sentry/config.yml'
+  - './sentry/sentry.conf.py:/usr/src/sentry/sentry.conf.py'
+  - './sentry/sentry.conf.py:/etc/sentry/sentry.conf.py'
+  - './sentry/config.yml:/etc/sentry/config.yml'
 services:
+  nginx:
+    ports:
+    {% for i in cops_sentry_ports %}
+    - '127.0.0.1:{{i}}:80'
+    {% endfor %}
   web:
     <<: [ *defaults ]
-    ports:
-    - '127.0.0.1:{{cops_sentry_port}}:9000'
   worker:
     environment: { <<: *env_sentry }
   cron:
     environment: { <<: *env_sentry }
   backup:
     environment: { <<: *env_postgres }
-    image: corpusops/dbsmartbackup
+    image: corpusops/dbsmartbackup:postgres-10
     restart: unless-stopped
     volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    - ./local/backup/setup/reconfigure.yml:/setup/reconfigure.yml:ro
-    - "{{cops_sentry_data_backup}}:/srv/backups"
+    - backupdb-dumps:/var/db_smart_backup/
+    - backupdb-logs:/var/db_smart_backup/logs/
   postgres:
     environment: { <<: *env_postgres }
-    volumes:
-    - "{{cops_sentry_data_postgresql}}:/var/lib/postgresql/data"
   redis:
     environment: { <<: *env_redis }
     cap_add:
     - sys_resource
+  kafka:
+    environment:
+      KAFKA_MESSAGE_MAX_BYTES: 250000000
+      KAFKA_MAX_REQUEST_SIZE:  250000000
   memcached:
     environment: { <<: *env_sentry }
   smtp:
     image: "turgon37/smtp-relay"
     environment: { <<: *env_smtp }
     volumes:
-    - "{{cops_sentry_data_mail}}:/data"
+    - 'sentry-smtp:/data'
+volumes:
+  backupdb-logs:
+  backupdb-dumps:

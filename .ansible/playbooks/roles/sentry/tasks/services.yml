@@ -1,10 +1,4 @@
 ---
-- name: compose pull & build
-  shell: |-
-    set -e
-    cd "{{cops_sentry_ct}}"
-    {{cops_sentry_dc}} build --pull
-  tags: sentry_build
 - include_role: {name: corpusops.roles/docker_compose_service}
   vars:
     _docker_compose_service:
