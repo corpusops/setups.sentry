@@ -101,3 +101,8 @@ transaction-events.force-disable-internal-project: true
 # slack.client-id: <'client id'>
 # slack.client-secret: <client secret>
 # slack.verification-token: <verification token>
+#
+#
+#https://github.com/getsentry/onpremise/issues/629#issuecomment-693576019
+postprocess.use-cache-key: 1.0
+
