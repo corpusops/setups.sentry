@@ -1,5 +1,5 @@
 ---
-cops_sentry_version: 20.7
+cops_sentry_version: 20.8
 cops_sentry_name: sentry
 cops_sentry_network: 172.18.5
 cops_sentry_front_ip: 127.0.0.1
