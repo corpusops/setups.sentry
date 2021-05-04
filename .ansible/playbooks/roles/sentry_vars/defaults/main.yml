@@ -1,5 +1,5 @@
 ---
-cops_sentry_version: 20.9
+cops_sentry_version: 21.3
 cops_sentry_name: sentry
 cops_sentry_network: 172.18.5
 cops_sentry_front_ip: 127.0.0.1
@@ -65,6 +65,7 @@ cops_sentry_use_ssl: "True"
 cops_sentry_docker_env: |-
   COMPOSE_PROJECT_NAME={{cops_sentry_composename}}
   SENTRY_SERVICE={{cops_sentry_composename}}
+  COMPOSE_FILE=docker-compose.yml:docker-compose.cops.yml
 cops_sentry_extra_conf: |-
   SENTRY_GITLAB_API_VERSION = 4
   SENTRY_GITLAB_AUTH_SCOPE = "api"
