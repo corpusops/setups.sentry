@@ -18,7 +18,7 @@ x-env-defaults: &img_defaults
     RELAY_POSTMASTER: "postmaster@{{cops_sentry_email_relay_domain}}"
     RELAY_MYHOSTNAME: "{{cops_sentry_email_relay_domain}}"
     RELAY_MYDOMAIN: "{{cops_sentry_email_relay_domain}}"
-    RELAY_MYNETWORKS: "127.0.0.0/8"
+    RELAY_MYNETWORKS: "127.0.0.0/8 10.0.0.0/8 192.168.0.0/16 172.16.0.0/12"
     RELAY_HOST: "[{{cops_sentry_email_server}}]:{{cops_sentry_email_server_port}}"
     RELAY_MODE: "ALLOW_AUTH_NODOMAIN"
     RELAY_STRICT_SENDER_MYDOMAIN: "false"
